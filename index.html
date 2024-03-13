@@ -21,12 +21,17 @@
                 const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
                 const peerConnection = new RTCPeerConnection(configuration);
-                peerConnection.addStream(stream);
+                
+                // Replace deprecated method 'addStream' with 'addTrack'
+                stream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, stream);
+                });
 
-                peerConnection.onaddstream = (event) => {
+                peerConnection.ontrack = (event) => {
+                    console.log(event.streams[0]);
                     const remoteVideo = document.createElement('video');
                     remoteVideo.autoplay = true;
-                    remoteVideo.srcObject = event.stream;
+                    remoteVideo.srcObject = event.streams[0];
                     videoContainer.appendChild(remoteVideo);
                 };
 
