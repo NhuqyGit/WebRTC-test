@@ -22,17 +22,33 @@ io.on('connection', (socket) => {
         console.log('User disconnected');
     });
 
-    socket.on('offer', (offer) => {
-        io.emit('offer', offer);
-    });
+    socket.on('offer', async (offer) => {
+      try {
+          await peerConnection.setRemoteDescription(offer);
+          const answer = await peerConnection.createAnswer();
+          await peerConnection.setLocalDescription(answer);
+          socket.emit('answer', answer);
+      } catch (error) {
+          console.error('Error handling offer:', error);
+      }
+  });
 
-    socket.on('answer', (answer) => {
-        io.emit('answer', answer); 
-    });
+  socket.on('answer', async (answer) => {
+      try {
+          await peerConnection.setRemoteDescription(answer);
+      } catch (error) {
+          console.error('Error handling answer:', error);
+      }
+  });
 
-    socket.on('icecandidate', (icecandidate) => {
-        io.emit('icecandidate', icecandidate); 
-    });
+  socket.on('icecandidate', async (icecandidate) => {
+      try {
+          await peerConnection.addIceCandidate(icecandidate);
+      } catch (error) {
+          console.error('Error handling icecandidate:', error);
+      }
+  });
+
 });
 
 const PORT = process.env.PORT || 3000;
