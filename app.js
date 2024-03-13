@@ -15,25 +15,52 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
+// Server-side
+const connections = []; // Danh sách kết nối
+
 io.on('connection', (socket) => {
-    console.log('A user connected');
+  console.log('A user connected');
+  
+  // Thêm socket mới vào danh sách kết nối
+  connections.push(socket);
 
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+    // Xóa socket khỏi danh sách khi ngắt kết nối
+    const index = connections.indexOf(socket);
+    if (index !== -1) {
+      connections.splice(index, 1);
+    }
+  });
 
-    socket.on('offer', (offer) => {
-        socket.broadcast.emit('offer', offer);
+  socket.on('offer', (offer) => {
+    // Gửi offer cho tất cả các kết nối
+    connections.forEach(conn => {
+      if (conn !== socket) { // Loại bỏ kết nối hiện tại
+        conn.emit('offer', offer);
+      }
     });
+  });
 
-    socket.on('answer', (answer) => {
-        socket.broadcast.emit('answer', answer);
+  socket.on('answer', (answer) => {
+    // Gửi answer cho tất cả các kết nối
+    connections.forEach(conn => {
+      if (conn !== socket) { // Loại bỏ kết nối hiện tại
+        conn.emit('answer', answer);
+      }
     });
+  });
 
-    socket.on('icecandidate', (icecandidate) => {
-        socket.broadcast.emit('icecandidate', icecandidate);
+  socket.on('icecandidate', (icecandidate) => {
+    // Gửi ice candidate cho tất cả các kết nối
+    connections.forEach(conn => {
+      if (conn !== socket) { // Loại bỏ kết nối hiện tại
+        conn.emit('icecandidate', icecandidate);
+      }
     });
+  });
 });
+
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
