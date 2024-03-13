@@ -22,19 +22,16 @@ io.on('connection', (socket) => {
         console.log('User disconnected');
     });
 
-    socket.on('offer', (data) => {
-        const { targetSocketId, offer } = data;
-        socket.to(targetSocketId).emit('offer', offer);
+    socket.on('offer', (offer) => {
+        socket.broadcast.emit('offer', offer);
     });
 
-    socket.on('answer', (data) => {
-        const { targetSocketId, answer } = data;
-        socket.to(targetSocketId).emit('answer', answer);
+    socket.on('answer', (answer) => {
+        socket.broadcast.emit('answer', answer);
     });
 
-    socket.on('icecandidate', (data) => {
-        const { targetSocketId, icecandidate } = data;
-        socket.to(targetSocketId).emit('icecandidate', icecandidate);
+    socket.on('icecandidate', (icecandidate) => {
+        socket.broadcast.emit('icecandidate', icecandidate);
     });
 });
 
